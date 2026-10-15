@@ -7,18 +7,12 @@ from . import config as C
 
 def ttc(gap, closing):
     """Time to collision [s] = gap / closing speed (inf when the gap is not closing)."""
-    # TODO (Bước 2): hãy tự cài hàm này. Gợi ý:
-    #   TTC = gap / closing khi closing > 0, ngược lại inf. Phải chạy được trên mảng numpy (dùng np.where,
-    #   tránh chia cho 0).
     gap, closing = np.asarray(gap, float), np.asarray(closing, float)
     return np.where(closing > 0, gap / np.where(closing > 0, closing, 1.0), np.inf)
 
 
 def required_decel(gap, closing):
     """Deceleration [m/s^2] needed to remove the closing speed exactly at contact: closing^2 / (2 gap)."""
-    # TODO (Bước 2): hãy tự cài hàm này. Gợi ý:
-    #   closing^2 / (2 * gap) khi closing > 0, ngược lại 0. Ví dụ của slide: gap 12 m, closing 5 m/s -> 1,04
-    #   m/s^2.
     gap, closing = np.asarray(gap, float), np.asarray(closing, float)
     return np.where(closing > 0, closing ** 2 / (2 * np.maximum(gap, 1e-9)), 0.0)
 
@@ -26,11 +20,6 @@ def required_decel(gap, closing):
 def unavoidable(gaps, dvs, t_react=0.0, b_max=C.B_MAX):
     """Boolean grid (len(dvs), len(gaps)): True where NO planner can avoid contact, even braking at b_max after the
     reaction delay: gap < dv * t_react + dv^2 / (2 b_max)  (lead keeps its speed)."""
-    # TODO (Bước 2): hãy tự cài hàm này. Gợi ý:
-    #   Hãy tự suy ra biên. Trong t_react xe vẫn giữ tốc độ nên khoảng cách co lại dv * t_react. Sau đó
-    #   phanh b_max cần dv^2 / (2 * b_max) để triệt tiêu tốc độ tiến gần. Bất khả thi khi gap nhỏ hơn tổng
-    #   hai đoạn đó. Dùng np.meshgrid(gaps, dvs) để kết quả có shape (len(dvs), len(gaps)). Với dv = 0 phải
-    #   luôn tránh được.
     G, DV = np.meshgrid(np.asarray(gaps, float), np.asarray(dvs, float))
     stopping = DV * t_react + DV ** 2 / (2 * b_max)
     return (DV > 0) & (G < stopping)
@@ -39,12 +28,6 @@ def unavoidable(gaps, dvs, t_react=0.0, b_max=C.B_MAX):
 def mine_braking(logs, threshold=C.BRAKE_THRESHOLD, min_steps=5):
     """Find trajectories where the lead brakes: smoothed deceleration below `threshold` for at least `min_steps`
     consecutive steps (0.5 s). Returns a list of event dicts (one per trajectory, first event only)."""
-    # TODO (Bước 2): hãy tự cài hàm này. Gợi ý:
-    #   Với mỗi quỹ đạo i: a = logs.a_lead[i, :logs.n[i]] (đã làm mượt; KHÔNG dùng acc_lead_raw). Tìm lần
-    #   ĐẦU TIÊN có đủ min_steps bước liên tiếp a < threshold. onset_step = bước bắt đầu chuỗi đó. Mỗi quỹ
-    #   đạo tối đa 1 sự kiện. Trả list dict có đúng các khoá: traj, onset_step, peak_decel (a nhỏ nhất trong
-    #   chuỗi), gap_m (logs.gap[i, onset]), closing_m_s (logs.v_ego[i, onset] - logs.v_lead_s[i, onset]),
-    #   ego_speed (logs.v_ego[i, onset]).
     events = []
     for i in range(len(logs.n)):
         a = logs.a_lead[i, :logs.n[i]]

@@ -20,9 +20,6 @@ def rule_closed_loop_logs(c, b, margin=0.01):
     """R2. Non-inferiority on the held-out logs. c, b: the candidate's and the baseline's entry of closedloop.json["logs"]
     (each has ["collision"] = {"rate", "ci95": [low, high], ...}; for a learned planner the entry is its WORST seed).
     Pass when the candidate's UPPER 95 % bound is <= baseline rate + margin. Returns (passed: bool, detail: str)."""
-    # TODO (Bước 6): hãy tự cài hàm này. Gợi ý:
-    #   Quy tắc không-kém-hơn: pass khi CẬN TRÊN 95% của ứng viên <= tỷ lệ va chạm của baseline + margin.
-    #   Trả (ok, chuỗi mô tả) với chuỗi nêu số của cả hai bên.
     upper, base = c["collision"]["ci95"][1], b["collision"]["rate"]
     ok = upper <= base + margin
     return bool(ok), (f"{c['collision']['rate']*100:.2f} % (upper {upper*100:.2f} %) vs baseline {base*100:.2f} % "
@@ -32,8 +29,6 @@ def rule_closed_loop_logs(c, b, margin=0.01):
 def rule_scenario_grid(area_candidate, area_baseline, margin=0.02):
     """R4. Both areas are the share of the cut-in grid where contact was avoidable but happened (0..1), worst seed.
     Pass when candidate <= baseline + margin. Returns (passed: bool, detail: str)."""
-    # TODO (Bước 6): hãy tự cài hàm này. Gợi ý:
-    #   pass khi diện tích của ứng viên <= diện tích của baseline + margin. Trả (ok, chuỗi mô tả).
     ok = area_candidate <= area_baseline + margin
     return bool(ok), (f"{area_candidate*100:.1f} % of the grid avoidable-but-hit vs baseline {area_baseline*100:.1f} % "
                       f"+ {margin*100:.0f} points")
